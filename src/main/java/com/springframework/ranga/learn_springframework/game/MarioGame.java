@@ -1,5 +1,8 @@
 package com.springframework.ranga.learn_springframework.game;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class MarioGame implements Games {
     public void up() {
         System.out.println("MarioGame Jump");
