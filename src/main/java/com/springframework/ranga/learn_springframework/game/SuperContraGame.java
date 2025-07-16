@@ -1,6 +1,6 @@
 package com.springframework.ranga.learn_springframework.game;
 
-public class SuperContraGame {
+public class SuperContraGame implements Games{
     public void up() {
         System.out.println("SuperContraGame Shoot");
     }
