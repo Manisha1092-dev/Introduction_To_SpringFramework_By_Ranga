@@ -64,6 +64,141 @@ You can use the @Autowired annotation on fields, setters, or constructors.
 ------------------------------------------------------------------------------------------------------------------------------------------
 
 
+🧠 Spring Beans: @Primary vs @Qualifier — Summary Notes with Examples
+
+🔧 The Problem
+- When multiple beans of the same type exist, Spring needs help deciding which one to inject, otherwise Spring throws an ambiguity error during autowiring.
+
+🥇 @Primary Annotation
+
+✅ Purpose - Marks one bean as the default when multiple candidates exist.
+
+🧪 Example
+
+@Component
+
+@Primary
+
+public class EmailNotificationService implements NotificationService {
+
+    public void send() { System.out.println("Email sent"); }
+    
+}
+
+
+@Component
+
+public class SMSNotificationService implements NotificationService {
+
+    public void send() { System.out.println("SMS sent"); }
+    
+}
+
+
+@Autowired
+
+private NotificationService notificationService;
+// Injects EmailNotificationService by default due to @Primary
+
+
+⚠️ Limitation
+
+- Static default — always injects the same bean unless overridden.
+- Switching requires code/config changes.
+- Other beans become unused unless explicitly selected.
+
+🎯 @Qualifier Annotation
+
+✅ Purpose
+- Explicitly specifies which bean to inject, overriding @Primary.
+  
+🧪 Example
+
+@Autowired
+
+@Qualifier("smsNotificationService")
+
+private NotificationService notificationService;
+// Injects SMSNotificationService even though EmailNotificationService is marked @Primary
+
+
+✅ Benefits
+
+- Precise control over bean selection.
+- Promotes modularity and flexibility.
+- Works seamlessly with @Primary.
+  
+
+🔄 Using Both Together
+
+| Scenario                          | Injected Bean                            | 
+
+| no @Qualifier, one @Primary       | @Primary bean                            | 
+
+| with @Qualifier                   | The bean matching the qualifier          | 
+
+| no @Primary,no @Qualifier         | Ambiguity error(if multiple beans exist) | 
+
+
+⚙️ Dynamic Bean Selection Strategies
+
+1. 🗂️ Injecting a Map of Beans
+   
+@Autowired
+
+private Map<String, NotificationService> serviceMap;
+
+public void send(String type) {
+    serviceMap.get(type).send();
+}
+
+
+- Benefit: Select bean at runtime using a key (e.g., "emailNotificationService", "smsNotificationService").
+- Use case: Feature toggles, user preferences, config-driven workflows.
+
+2. 🧭 Strategy Pattern
+   
+public interface NotificationStrategy {
+    void send();
+}
+
+@Component("email")
+
+public class EmailStrategy implements NotificationStrategy {
+    public void send() { System.out.println("Email strategy"); }
+}
+
+@Component("sms")
+public class SMSStrategy implements NotificationStrategy {
+    public void send() { System.out.println("SMS strategy"); }
+}
+
+@Service
+public class NotificationContext {
+    @Autowired
+    private Map<String, NotificationStrategy> strategies;
+
+    public void execute(String channel) {
+        strategies.get(channel).send();
+    }
+}
+
+
+- Benefit: Clean separation of logic, extensible for new strategies.
+- Use case: Dynamic routing, multi-tenant systems, plugin architectures.
+
+3. 🧪 Environment-Specific Beans with @Profile
+@Profile("dev")
+@Component
+public class DevDataSource implements DataSource { ... }
+
+@Profile("prod")
+@Component
+public class ProdDataSource implements DataSource { ... }
+
+
+- Benefit: Automatically activates the right bean based on environment.
+- Use case: Dev/test/prod configurations
 
 
 
